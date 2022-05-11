@@ -1,0 +1,56 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: 'redis'
+  labels:
+    app.openshift.io/runtime: redis
+    deploymentconfig: 'redis'
+    app.kubernetes.io/name: 'redis'
+    app.kubernetes.io/part-of: bullmq
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    deploymentconfig: 'redis'
+    app.kubernetes.io/name: 'redis'
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        deploymentconfig: 'redis'
+        app.kubernetes.io/name: 'redis'
+    spec:
+      volumes:
+        - name: redis-pv
+          persistentVolumeClaim:
+            claimName: "redis-data"
+      containers:
+          - name: "redis"
+            image: "redis:7.0.0"
+            args: 
+            - "redis-server"
+            - "--appendonly"
+            - "yes"
+            - "--maxmemory" 
+            - "900mb"
+            - "--maxmemory-policy"
+            - "noeviction"
+            - "--timeout"
+            - "3600"
+            imagePullPolicy: "IfNotPresent"
+            ports:
+              - containerPort: 6379
+                name: http
+                protocol: TCP
+            resources:
+              limits:
+                memory: "512Mi"
+              requests:
+                cpu: 1
+                memory: "512Mi"
+            volumeMounts:
+              - name: redis-pv
+                mountPath: /data
+  triggers:
+    - type: ConfigChange

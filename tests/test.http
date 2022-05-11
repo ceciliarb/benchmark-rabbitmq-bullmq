@@ -1,0 +1,16 @@
+##########################################################
+POST http://localhost:3000/bullmq HTTP/1.1
+Content-Type: application/json
+
+##########################################################
+POST http://localhost:3000/rabbitmq HTTP/1.1
+Content-Type: application/json
+
+
+##########################################################
+POST http://benchmark-api.apps.ocp-dc1.pbh.gov.br/bullmq HTTP/1.1
+Content-Type: application/json
+
+##########################################################
+POST http://benchmark-api.apps.ocp-dc1.pbh.gov.br/rabbitmq HTTP/1.1
+Content-Type: application/json

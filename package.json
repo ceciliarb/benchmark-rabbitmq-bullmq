@@ -1,0 +1,28 @@
+{
+  "name": "benchmark-bullmq-rabbitmq",
+  "version": "1.0.0",
+  "description": "Comparing the performance between 2 simple implementations of queues using BullMq and RabbitMq",
+  "main": "api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "benchmark",
+    "benchmarking",
+    "bull",
+    "bullmq",
+    "rabbitmq",
+    "queues",
+    "queue"
+  ],
+  "author": "Cecilia Brzezina",
+  "license": "MIT",
+  "dependencies": {
+    "@types/k6": "^0.37.0",
+    "amqplib": "^0.8.0",
+    "bullmq": "^1.81.4",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.1",
+    "k6": "^0.0.0"
+  }
+}

@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bull-board-cm
+data:
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: bull-board
+  labels:
+    app: bull-board
+    app.kubernetes.io/component: bull-board
+    app.openshift.io/runtime-version: latest
+    router: prod
+spec:
+  host: benchmark-bull-board.apps.ocp-dc1.pbh.gov.br
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: bull-board
+    weight: 100
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bull-board
+spec:
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    deploymentconfig: bull-board-dc
+    app.kubernetes.io/name: bull-board-dc
+
+---
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: bull-board-dc
+  labels:
+    app.openshift.io/runtime: nodejs
+    deploymentconfig: bull-board-dc
+    app.kubernetes.io/name: bull-board-dc
+    app.kubernetes.io/part-of: bullmq
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    deploymentconfig: bull-board-dc
+    app.kubernetes.io/name: bull-board-dc
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        deploymentconfig: bull-board-dc
+        app.kubernetes.io/name: bull-board-dc
+    spec:
+      initContainers:
+        - name: wait-for-redis
+          imagePullPolicy: "IfNotPresent"
+          image: busybox
+          command:
+          - /bin/sh
+          - -c
+          - >
+            set -x;
+            until nc redis 6379;
+            do echo waiting for redis;
+            sleep 10; done
+      containers:
+          - name: bull-board
+            image: deadly0/bull-board:latest
+            imagePullPolicy: IfNotPresent
+            ports:
+              - containerPort: 3000
+                name: http
+                protocol: TCP
+            resources:
+              limits:
+                memory: "256Mi"
+              requests:
+                cpu: "100m"
+                memory: "256Mi"
+            envFrom:
+              - configMapRef:
+                  name: bull-board-cm
+  triggers:
+    - type: ConfigChange

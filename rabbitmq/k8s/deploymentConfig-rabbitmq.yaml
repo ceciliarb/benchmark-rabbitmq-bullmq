@@ -1,0 +1,42 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: 'rabbitmq'
+  labels:
+    app.openshift.io/runtime: rabbitmq
+    deploymentconfig: 'rabbitmq'
+    app.kubernetes.io/name: 'rabbitmq'
+    app.kubernetes.io/part-of: rabbitmq
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    deploymentconfig: 'rabbitmq'
+    app.kubernetes.io/name: 'rabbitmq'
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        deploymentconfig: 'rabbitmq'
+        app.kubernetes.io/name: 'rabbitmq'
+    spec:
+      containers:
+          - name: "rabbitmq"
+            image: "rabbitmq:management"
+            imagePullPolicy: "IfNotPresent"
+            ports:
+              - containerPort: 5672
+                name: rabbitmq
+                protocol: TCP
+              - containerPort: 15672
+                name: rabbitmqui
+                protocol: TCP
+            resources:
+              limits:
+                memory: "512Mi"
+              requests:
+                cpu: 1
+                memory: "512Mi"
+  triggers:
+    - type: ConfigChange

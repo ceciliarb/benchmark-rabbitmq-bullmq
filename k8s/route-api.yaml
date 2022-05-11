@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: api
+  labels:
+    app: api
+    app.kubernetes.io/component: api
+    app.openshift.io/runtime-version: latest
+    router: prod
+spec:
+  host: "benchmark-api.apps.ocp-dc1.pbh.gov.br"
+  port:
+    targetPort: api
+  to:
+    kind: Service
+    name: "api"
+    weight: 100

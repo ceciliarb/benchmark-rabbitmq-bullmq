@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-cm
+data:
+  RABBITMQ_SERVER: rabbitmq
+  RABBITMQ_PORT: "5672"
+---  
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: 'rabbitmq-worker'
+  labels:
+    app.openshift.io/runtime: nodejs
+    deploymentconfig: 'rabbitmq-worker'
+    app.kubernetes.io/name: 'rabbitmq-worker'
+    app.kubernetes.io/part-of: rabbitmq
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    deploymentconfig: 'rabbitmq-worker'
+    app.kubernetes.io/name: 'rabbitmq-worker'
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        deploymentconfig: 'rabbitmq-worker'
+        app.kubernetes.io/name: 'rabbitmq-worker'
+    spec:
+      containers:
+          - name: "rabbitmq-worker"
+            image: "ceciliarb/benchmark-rabbitmq-worker:latest"
+            imagePullPolicy: "IfNotPresent"
+            resources:
+              limits:
+                memory: "512Mi"
+              requests:
+                cpu: 1
+                memory: "512Mi"
+            envFrom:
+              - configMapRef:
+                  name: rabbitmq-cm
+  triggers:
+    - type: ConfigChange
